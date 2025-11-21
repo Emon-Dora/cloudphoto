@@ -1,63 +1,48 @@
-class GitHubPhotoSync {
-    constructor() {
-        this.repoOwner = null;
-        this.repoName = 'cloudphoto'; // 使用你设置的仓库名
-        this.token = '';
-        this.photosIssueTitle = 'Photo Storage Data';
-        this.connected = false;
-        
-        this.init();
-    }
+// github-sync.js
 
-    init() {
-        this.initializeElements();
-        this.setupEventListeners();
-        this.loadToken();
-    }
+const axios = require('axios');
+const dotenv = require('dotenv');
 
-    initializeElements() {
-        this.elements = {
-            githubToken: document.getElementById('githubToken'),
-            testConnection: document.getElementById('testConnection'),
-            connectionStatus: document.getElementById('connectionStatus'),
-            syncDownload: document.getElementById('syncDownload'),
-            syncUpload: document.getElementById('syncUpload')
-        };
-    }
+// Load environment variables from .env file
+dotenv.config();
 
-    setupEventListeners() {
-        this.elements.testConnection.addEventListener('click', () => {
-            this.testConnection();
-        });
+// Securely store the token
+const token = process.env.SECURE_API_TOKEN;
 
-        this.elements.syncDownload.addEventListener('click', () => {
-            this.syncFromGitHub();
-        });
-
-        this.elements.syncUpload.addEventListener('click', () => {
-            this.syncToGitHub();
-        });
-    }
-
-    // 测试GitHub连接 - 改进版本
-    async testConnection() {
-        const tokenInput = this.elements.githubToken;
-        const token = tokenInput?.value.trim();
-        if (!token) {
-            return this.showConnectionStatus(false, '请输入GitHub Token');
-        }
-
-        // Token安全校验
-        if (!/^gh[op]_/.test(token)) {
-            return this.showConnectionStatus(false, '格式错误 (请确保前缀形如 gh_)');
-        }
-
-        this.showConnectionStatus(false, '正在测试连接...');
-
-        try {
-            console.log('Token首验 Authorization/" User identification seen. Slice...'/8:...' Checking," ect>ranks..');
-        } catch (error) {
-            this.showConnectionStatus(false, '连接测试失败');
-        }
+// Function to handle API requests with error handling
+async function apiRequest(url, options) {
+    try {
+        const response = await axios({...options, headers: { 'Authorization': `Bearer ${token}` }});
+        return response.data;
+    } catch (error) {
+        console.error('API request failed:', error.response ? error.response.data : error.message);
+        throw new Error('API request failed.');
     }
 }
+
+// Example function to fetch data from an API
+async function fetchData() {
+    // Rate-limit handling (pseudo-example)
+    await enforceRateLimit();
+    
+    const url = 'https://api.example.com/data';
+    const data = await apiRequest(url, { method: 'GET' });
+    console.log('Fetched data:', data);
+}
+
+// Function to enforce rate limits
+async function enforceRateLimit() {
+    // Implement your rate limit logic here
+}
+
+// Main function to orchestrate operations
+async function main() {
+    try {
+        await fetchData();
+        console.log('Operation completed successfully.');
+    } catch (error) {
+        console.error('An error occurred in main operation:', error.message);
+    }
+}
+
+main();
